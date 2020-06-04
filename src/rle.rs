@@ -1,5 +1,6 @@
 use std::convert::{TryFrom, TryInto};
 
+use crate::compress::Compress;
 use crate::error::DecodeError;
 
 struct Run {
@@ -33,17 +34,21 @@ impl From<&Run> for Vec<u8> {
     }
 }
 
-pub fn encode(data: String) -> Vec<u8> {
-    runs(data.bytes()).iter().flat_map(Vec::from).collect()
-}
+pub struct RLE;
 
-pub fn decode(data: Vec<u8>) -> Result<String, DecodeError> {
-    data.chunks(9)
-        .map(|val| Run::try_from(val).and_then(|r| Ok(r.into_bytes())))
-        .collect::<Result<Vec<_>, _>>()
-        .and_then(|bs| {
-            String::from_utf8(bs.into_iter().flatten().collect()).or_else(|_| Err(DecodeError))
-        })
+impl Compress for RLE {
+    fn encode(&self, data: String) -> Vec<u8> {
+        runs(data.bytes()).iter().flat_map(Vec::from).collect()
+    }
+
+    fn decode(&self, data: Vec<u8>) -> Result<String, DecodeError> {
+        data.chunks(9)
+            .map(|val| Run::try_from(val).and_then(|r| Ok(r.into_bytes())))
+            .collect::<Result<Vec<_>, _>>()
+            .and_then(|bs| {
+                String::from_utf8(bs.into_iter().flatten().collect()).or_else(|_| Err(DecodeError))
+            })
+    }
 }
 
 fn runs<T: IntoIterator<Item = u8>>(data: T) -> Vec<Run> {
@@ -77,7 +82,7 @@ mod tests {
             "a".repeat(1000),
         ];
         for test in tests.iter() {
-            let roundtrip = decode(encode(test.to_string()));
+            let roundtrip = RLE.decode(RLE.encode(test.to_string()));
             assert!(roundtrip.is_ok());
             assert_eq!(roundtrip.unwrap(), test.to_string());
         }
