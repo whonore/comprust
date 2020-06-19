@@ -1,5 +1,6 @@
 pub mod compress;
 pub mod error;
+pub mod lzw;
 pub mod rle;
 
 use std::env;
@@ -13,6 +14,8 @@ fn main() -> CompressResult {
     let args: Vec<String> = env::args().collect();
     let comp: AnyCompress = if args.contains(&"--rle".to_string()) {
         &rle::RLE
+    } else if args.contains(&"--lzw".to_string()) {
+        &lzw::LZW
     } else {
         &rle::RLE
     };
