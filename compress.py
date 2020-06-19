@@ -199,7 +199,7 @@ class LZW(Compressor):
                     f"Emitting {bytes(word[:-1])} ({dict[bytes(word[:-1])]})\t--\t"
                     f"Inserting {bytes(word)} ({dict.max_code})"
                 )
-                word = word[-1:]
+                word = bytearray([c])
         assert len(word) > 0 or len(data) == 0
         if word != bytearray():
             assert bytes(word) in dict

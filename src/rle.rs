@@ -19,7 +19,7 @@ impl TryFrom<&[u8]> for Run {
     fn try_from(bs: &[u8]) -> Result<Self, Self::Error> {
         let cnt: [u8; 8] = bs[..8].try_into().or_else(|_| Err(DecodeError))?;
         let c = bs[8];
-        Ok(Run {
+        Ok(Self {
             char: c,
             len: usize::from_be_bytes(cnt),
         })
