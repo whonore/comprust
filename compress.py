@@ -1,7 +1,7 @@
 import math
 import os
 import sys
-from itertools import zip_longest
+from itertools import groupby, zip_longest
 from typing import (
     Iterable,
     Iterator,
@@ -70,20 +70,8 @@ class RLE(Compressor):
         ).decode()
 
     @staticmethod
-    def runs(data: bytes) -> Sequence[Run]:
-        if data == b"":
-            return []
-
-        runs = [Run(data[0], 0)]
-        for char in data:
-            prev = runs[-1]
-            if prev.char == char:
-                prev.length += 1
-            else:
-                runs.append(Run(char, 1))
-
-        return runs
-
+    def runs(data: Sequence[byte]) -> Iterator[Run]:
+        return (Run(c, len(list(g))) for c, g in groupby(iter(data)))
 
 class Bits:
     def __init__(self) -> None:
